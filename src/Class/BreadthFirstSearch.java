@@ -1,32 +1,46 @@
 package Class;
 
-import java.util.LinkedList;
-import java.util.Queue;
+import java.util.*;
 
-public class BreadthFirstSearch<Vertex> extends Search<Vertex>{
-    public BreadthFirstSearch(MyGraph<Vertex> graph, Vertex source) {
-        super(source);
-
-        bfs(graph, source);
+public class BreadthFirstSearch<V> extends Search<V> {
+    public BreadthFirstSearch(WeightedGraph<V> graph, V startVertex) {
+        super(graph, startVertex);
     }
 
-    private void bfs(MyGraph<Vertex> graph, Vertex current) {
-        marked.add(current);
+    @Override
+    public List<V> getPathTo(V endVertex) {
+        Map<V, V> parentMap = new HashMap<>();
+        Queue<V> queue = new LinkedList<>();
+        Set<V> visited = new HashSet<>();
 
-
-        Queue<Vertex> queue = new LinkedList<>();
-        queue.add(current); //[0]
+        queue.add(startVertex);
+        visited.add(startVertex);
 
         while (!queue.isEmpty()) {
-            Vertex v = queue.remove(); // []
+            V current = queue.poll();
+            if (current.equals(endVertex)) {
+                break;
+            }
 
-            for (Vertex vertex : graph.adjacencyList(v)) {
-                if (!marked.contains(vertex)) {
-                    marked.add(vertex);
-                    edgeTo.put(vertex, v); // {[1,0] [2,0] [3,0] [4 0] [5 1] [6 1] [7 2]}
-                    queue.add(vertex); // [1,2,3,4]
+            for (Vertex<V> neighbor : graph.getVertex(current).getAdjacentVertices().keySet()) {
+                if (!visited.contains(neighbor.getData())) {
+                    visited.add(neighbor.getData());
+                    parentMap.put(neighbor.getData(), current);
+                    queue.add(neighbor.getData());
                 }
             }
         }
+
+        List<V> path = new LinkedList<>();
+        V step = endVertex;
+        if (parentMap.containsKey(step) || step.equals(startVertex)) {
+            while (step != null) {
+                path.add(step);
+                step = parentMap.get(step);
+            }
+            Collections.reverse(path);
+        }
+
+        return path;
     }
 }
