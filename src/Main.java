@@ -10,14 +10,17 @@ public class Main {
         graph.addEdge("Almaty", "Shymkent", 2);
         graph.addEdge("Astana", "Atyrau", 5);
 
-        DijkstraSearch<String> dijkstra = new DijkstraSearch<>(graph, "Almaty");
-        BreadthFirstSearch<String> bfs = new BreadthFirstSearch<>(graph, "Almaty");
+        Vertex<String> startVertex = graph.getVertex("Almaty");
+        Vertex<String> endVertex = graph.getVertex("Kyzylorda");
+
+        DijkstraSearch<String> dijkstra = new DijkstraSearch<>(graph, startVertex);
+        BreadthFirstSearch<String> bfs = new BreadthFirstSearch<>(graph, startVertex);
 
         System.out.println("Dijkstra:");
-        System.out.println(String.join(" -> ", dijkstra.getPathTo("Kyzylorda")));
+        System.out.println(String.join(" -> ", dijkstra.getPathTo(endVertex)));
         System.out.println("--------------------------------");
         System.out.println("BFS:");
-        System.out.println(String.join(" -> ", bfs.getPathTo("Kyzylorda")));
+        System.out.println(String.join(" -> ", bfs.getPathTo(endVertex)));
         System.out.println("--------------------------------");
     }
 }
