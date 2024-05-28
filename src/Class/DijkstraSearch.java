@@ -2,58 +2,48 @@ package Class;
 
 import java.util.*;
 
-public class DijkstraSearch<V> {
-    private WeightedGraph<V> graph;
-
-    public DijkstraSearch(WeightedGraph<V> graph) {
-        this.graph = graph;
+public class DijkstraSearch<V> extends Search<V> {
+    public DijkstraSearch(WeightedGraph<V> graph, Vertex<V> startVertex) {
+        super(graph, startVertex);
     }
 
-    public List<V> dijkstra(V start, V goal) {
-        List<V> path = new ArrayList<>();
+    @Override
+    public List<V> getPathTo(Vertex<V> endVertex) {
+        Map<Vertex<V>, Vertex<V>> parentMap = new HashMap<>();
         Map<Vertex<V>, Double> distances = new HashMap<>();
-        Map<Vertex<V>, Vertex<V>> cameFrom = new HashMap<>();
         PriorityQueue<Vertex<V>> priorityQueue = new PriorityQueue<>(Comparator.comparing(distances::get));
-        Set<Vertex<V>> visited = new HashSet<>();
 
-        Vertex<V> startVertex = graph.getVertex(start);
-        Vertex<V> goalVertex = graph.getVertex(goal);
-
-        if (startVertex == null || goalVertex == null) {
-            return path;
+        for (Vertex<V> vertex : graph.getVertices().values()) {
+            distances.put(vertex, Double.POSITIVE_INFINITY);
         }
-
         distances.put(startVertex, 0.0);
+
         priorityQueue.add(startVertex);
 
         while (!priorityQueue.isEmpty()) {
             Vertex<V> current = priorityQueue.poll();
 
-            if (current.equals(goalVertex)) {
-                while (current != null) {
-                    path.add(0, current.getData());
-                    current = cameFrom.get(current);
-                }
-                break;
-            }
-
-            visited.add(current);
-
-            for (Map.Entry<Vertex<V>, Double> neighborEntry : current.getAdjacentVertices().entrySet()) {
-                Vertex<V> neighbor = neighborEntry.getKey();
-                double weight = neighborEntry.getValue();
-
-                if (visited.contains(neighbor)) {
-                    continue;
-                }
-
+            for (Map.Entry<Vertex<V>, Double> entry : current.getAdjacentVertices().entrySet()) {
+                Vertex<V> neighbor = entry.getKey();
+                double weight = entry.getValue();
                 double newDist = distances.get(current) + weight;
-                if (newDist < distances.getOrDefault(neighbor, Double.MAX_VALUE)) {
+
+                if (newDist < distances.get(neighbor)) {
                     distances.put(neighbor, newDist);
-                    cameFrom.put(neighbor, current);
+                    parentMap.put(neighbor, current);
                     priorityQueue.add(neighbor);
                 }
             }
+        }
+
+        List<V> path = new LinkedList<>();
+        Vertex<V> step = endVertex;
+        if (parentMap.containsKey(step) || step.equals(startVertex)) {
+            while (step != null) {
+                path.add(step.getData());
+                step = parentMap.get(step);
+            }
+            Collections.reverse(path);
         }
 
         return path;
